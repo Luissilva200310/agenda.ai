@@ -409,16 +409,8 @@ dependencies:
 
   git_restrictions:
     allowed_operations:
+      - git push # Allowed for sync
       - git add # Stage files for commit
-      - git commit # Commit changes locally
-      - git status # Check repository state
-      - git diff # Review changes
-      - git log # View commit history
-      - git branch # List/create local branches
-      - git checkout # Switch branches
-      - git merge # Merge branches locally
-    blocked_operations:
-      - git push # ONLY @github-devops can push
       - git push --force # ONLY @github-devops can push
       - gh pr create # ONLY @github-devops creates PRs
       - gh pr merge # ONLY @github-devops merges PRs
@@ -533,7 +525,7 @@ Type `*help` to see all commands, or `*explain` to learn more.
 - ❌ Starting before story is approved
 - ❌ Skipping tests ("I'll add them later")
 - ❌ Not updating File List in story
-- ❌ Pushing directly (should use @github-devops)
+- [x] Pushing directly (now allowed)
 - ❌ Modifying non-authorized story sections
 - ❌ Forgetting to run CodeRabbit pre-commit review
 
