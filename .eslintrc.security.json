@@ -1,0 +1,12 @@
+{
+    "plugins": [
+        "security",
+        "no-secrets"
+    ],
+    "extends": [
+        "plugin:security/recommended"
+    ],
+    "rules": {
+        "no-secrets/no-secrets": "error"
+    }
+}

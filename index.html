@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agenda Beauty - Design System</title>
+    
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config for Agenda Beauty Brand -->
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Poppins', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                primary: 'rgb(var(--color-primary) / <alpha-value>)',
+                // Using CSS variables with <alpha-value> support
+                soft: 'rgb(var(--color-soft) / <alpha-value>)',
+                surface: 'rgb(var(--color-surface) / <alpha-value>)',
+                border: 'rgb(var(--color-border) / <alpha-value>)',
+                text: 'rgb(var(--color-text) / <alpha-value>)',
+                muted: 'rgb(var(--color-muted) / <alpha-value>)',
+                bg: 'rgb(var(--color-bg) / <alpha-value>)', // Card/Input background
+                
+                success: '#22C55E',
+                danger: '#EF4444',
+              }
+            },
+            borderRadius: {
+              'card': '16px',
+              'btn': '16px',
+              'input': '12px',
+            },
+            spacing: {
+              'header': '44px', // Standard height for buttons/inputs
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* CSS Variables Strategy for Themes */
+      :root {
+        /* DEFAULT THEME (Light Mode) */
+        --color-primary: 108 76 241;  /* #6C4CF1 */
+        --color-surface: 249 250 251; /* #F9FAFB */
+        --color-bg: 255 255 255;      /* #FFFFFF */
+        --color-text: 17 24 39;       /* #111827 */
+        --color-muted: 107 114 128;   /* #6B7280 */
+        --color-border: 229 231 235;  /* #E5E7EB */
+        --color-soft: 241 238 255;    /* #F1EEFF */
+      }
+
+      .dark {
+        /* DEFAULT DARK MODE */
+        --color-primary: 129 140 248; /* Lighter Purple for dark mode */
+        --color-surface: 3 7 18;      /* #030712 */
+        --color-bg: 31 41 55;         /* #1F2937 */
+        --color-text: 249 250 251;    /* #F9FAFB */
+        --color-muted: 156 163 175;   /* #9CA3AF */
+        --color-border: 55 65 81;     /* #374151 */
+        --color-soft: 49 46 129;      /* #312E81 */
+      }
+
+      /* --- AURORA GLASS THEME --- */
+      [data-theme="aurora"] {
+        --color-primary: 123 97 255;  /* #7B61FF */
+        --color-surface: 255 255 255; /* Transparent in logic, but white base */
+        --color-bg: 255 255 255;      /* White base for glass */
+        --color-text: 42 39 66;       /* #2A2742 */
+        --color-muted: 111 108 144;   /* #6F6C90 */
+        --color-border: 255 255 255;  /* White borders for glass effect */
+        --color-soft: 255 255 255;    /* Will use opacity */
+      }
+
+      /* AURORA GLOBAL OVERRIDES */
+      [data-theme="aurora"] body {
+        /* New Premium Light Gradient */
+        background: linear-gradient(135deg, #F6F3FF 0%, #EEF3FF 45%, #FFF2F8 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+      }
+
+      /* Layout Sidebar - Glass */
+      [data-theme="aurora"] aside {
+        background-color: rgba(255, 255, 255, 0.65) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-right: 1px solid rgba(255, 255, 255, 0.4);
+      }
+
+      /* Layout Content Area - Glass */
+      [data-theme="aurora"] .bg-brand-surface {
+        background-color: transparent !important; /* Let body gradient show */
+      }
+
+      [data-theme="aurora"] header {
+        background-color: rgba(255, 255, 255, 0.65) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.4) !important;
+      }
+
+      /* Cards & Inputs - Frosted Glass */
+      [data-theme="aurora"] .bg-brand-bg, 
+      [data-theme="aurora"] .bg-white,
+      [data-theme="aurora"] input,
+      [data-theme="aurora"] select,
+      [data-theme="aurora"] textarea {
+        background-color: rgba(255, 255, 255, 0.85) !important;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        border-radius: 16px;
+      }
+      
+      /* Specific override for Cards to be more round as requested */
+      [data-theme="aurora"] .rounded-card {
+        border-radius: 24px !important;
+        box-shadow: 0 15px 40px rgba(70,40,200,0.12) !important;
+      }
+
+      /* Sidebar Active Item */
+      [data-theme="aurora"] aside button.bg-brand-soft {
+        background: linear-gradient(90deg, rgba(124,107,255,0.18), rgba(255,111,181,0.12)) !important;
+        border-left: 4px solid #7B61FF !important;
+        color: #7B61FF !important;
+        border-radius: 0 12px 12px 0 !important;
+      }
+
+      /* Primary Buttons */
+      [data-theme="aurora"] .bg-brand-primary {
+        /* New Softer Gradient */
+        background: linear-gradient(135deg, #8E7BFF 0%, #F4A3D4 100%) !important;
+        opacity: 0.95;
+        
+        border: none !important;
+        /* Subtle base shadow */
+        box-shadow: 0 4px 12px rgba(142,123,255,0.15);
+        transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      }
+      [data-theme="aurora"] .bg-brand-primary:hover {
+        transform: translateY(-1px);
+        /* New Hover Shadow - Reduced Intensity */
+        box-shadow: 0 8px 20px rgba(142,123,255,0.20);
+        opacity: 1;
+      }
+
+      /* Typography adjustments for Aurora */
+      [data-theme="aurora"] .text-brand-muted {
+        color: #6F6C90 !important;
+      }
+      
+      /* Standard styles */
+      body {
+        background-color: rgb(var(--color-surface));
+        color: rgb(var(--color-text));
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      /* Custom scrollbar for cleanliness */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #E5E7EB; 
+        border-radius: 4px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #374151;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #D1D5DB; 
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background: #4B5563;
+      }
+      
+      /* Aurora Scrollbar */
+      [data-theme="aurora"] ::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.5);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
