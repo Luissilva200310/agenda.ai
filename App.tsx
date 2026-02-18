@@ -25,8 +25,19 @@ const App: React.FC = () => {
     addAppointment
   } = useAppContext();
 
-  // Check session and listen for auth changes
+  // Check session, URL params, and listen for auth changes
   useEffect(() => {
+    // Check URL params FIRST for public/admin access
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view');
+    if (viewParam === 'public') {
+      setCurrentView(ViewMode.PUBLIC_SERVICE);
+      return; // Don't check session for public views
+    } else if (viewParam === 'admin') {
+      setCurrentView(ViewMode.ADMIN_LOGIN);
+      return;
+    }
+
     // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -35,7 +46,6 @@ const App: React.FC = () => {
         }
       } else {
         // Only force login if we are in a protected area
-        // (Public views and admin views might have their own logic)
         const publicViews = [
           ViewMode.LOGIN,
           ViewMode.SIGNUP,
@@ -60,7 +70,7 @@ const App: React.FC = () => {
           setCurrentView(ViewMode.DASHBOARD);
         }
       } else {
-        // Don't redirect if we're on a public/auth view (signup, verify email, onboarding, etc.)
+        // Don't redirect if we're on a public/auth view
         const safeViews = [
           ViewMode.LOGIN,
           ViewMode.SIGNUP,
@@ -79,17 +89,6 @@ const App: React.FC = () => {
 
     return () => subscription.unsubscribe();
   }, [currentView, setCurrentView]);
-
-  // Check URL params for quick navigation (simulated)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const viewParam = params.get('view');
-    if (viewParam === 'public') {
-      setCurrentView(ViewMode.PUBLIC_SERVICE);
-    } else if (viewParam === 'admin') {
-      setCurrentView(ViewMode.ADMIN_LOGIN);
-    }
-  }, [setCurrentView]);
 
 
   // -- RENDER LOGIC --
