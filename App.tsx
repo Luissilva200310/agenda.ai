@@ -40,6 +40,7 @@ const App: React.FC = () => {
           ViewMode.LOGIN,
           ViewMode.SIGNUP,
           ViewMode.ADMIN_LOGIN,
+          ViewMode.VERIFY_EMAIL,
           ViewMode.ONBOARDING_1,
           ViewMode.ONBOARDING_2,
           ViewMode.ONBOARDING_3
@@ -113,6 +114,7 @@ const App: React.FC = () => {
   if (
     currentView === ViewMode.LOGIN ||
     currentView === ViewMode.SIGNUP ||
+    currentView === ViewMode.VERIFY_EMAIL ||
     currentView.startsWith('ONBOARDING')
   ) {
     return <AuthScreens view={currentView} onNavigate={setCurrentView} />;

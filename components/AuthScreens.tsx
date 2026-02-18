@@ -16,6 +16,25 @@ interface AuthProps {
   onNavigate: (view: ViewMode) => void;
 }
 
+// Helper to map camelCase to snake_case for DB
+const mapToDbDetails = (data: any) => ({
+  business_name: data.businessName,
+  slug: data.slug,
+  description: data.description,
+  cover_color: data.coverColor,
+  cover_image: data.coverImage,
+  logo: data.logo,
+  theme_color: data.themeColor,
+  phone: data.phone,
+  address: data.address,
+  open_days: data.openDays,
+  open_time: data.openTime,
+  close_time: data.closeTime,
+  owner_name: data.ownerName,
+  owner_title: data.ownerTitle,
+  email: data.email
+});
+
 export const AuthScreens: React.FC<AuthProps> = ({ view, onNavigate }) => {
   const { resetData, setBusinessSettings, businessSettings } = useAppContext();
   const [loading, setLoading] = useState(false);
@@ -33,10 +52,13 @@ export const AuthScreens: React.FC<AuthProps> = ({ view, onNavigate }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
+      // Map data to match database column names (snake_case)
+      const dbData = mapToDbDetails(onboardingData);
+
       const { error: upsertError } = await supabase
         .from('business_settings')
         .upsert({
-          ...onboardingData,
+          ...dbData,
           user_id: user.id,
           updated_at: new Date().toISOString()
         });
@@ -96,7 +118,7 @@ export const AuthScreens: React.FC<AuthProps> = ({ view, onNavigate }) => {
     setError(null);
 
     try {
-      const { error: signupError } = await supabase.auth.signUp({
+      const { data, error: signupError } = await supabase.auth.signUp({
         email: signupData.email,
         password: signupData.password,
         options: {
@@ -107,6 +129,13 @@ export const AuthScreens: React.FC<AuthProps> = ({ view, onNavigate }) => {
       });
 
       if (signupError) throw signupError;
+
+      // Check if email confirmation is required
+      if (data?.user && !data.session) {
+        // Email confirmation required
+        onNavigate(ViewMode.VERIFY_EMAIL); // We need to add this to types.ts first, but for now let's handle in component or add a local state view
+        return;
+      }
 
       // Set the initial onboarding data from signup
       setOnboardingData(prev => ({
@@ -122,6 +151,34 @@ export const AuthScreens: React.FC<AuthProps> = ({ view, onNavigate }) => {
       setLoading(false);
     }
   };
+
+  // -- VERIFY EMAIL SCREEN --
+  if (view === 'VERIFY_EMAIL' as ViewMode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-brand-surface p-4 relative">
+        <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-center">
+          <div className="w-16 h-16 bg-brand-primary/10 text-brand-primary rounded-full flex items-center justify-center mx-auto mb-4">
+            <Mail size={32} />
+          </div>
+          <Heading2>Verifique seu e-mail</Heading2>
+          <BodyText>
+            Enviamos um link de confirmação para <strong>{signupData.email}</strong>.
+            <br />
+            Clique no link para ativar sua conta e continuar.
+          </BodyText>
+
+          <Card className="p-6">
+            <BodyText className="text-sm text-brand-muted mb-4">
+              Já confirmou? Tente fazer login.
+            </BodyText>
+            <Button className="w-full" onClick={() => onNavigate(ViewMode.LOGIN)}>
+              Ir para Login
+            </Button>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   // -- LOGIN SCREEN --
   if (view === ViewMode.LOGIN) {

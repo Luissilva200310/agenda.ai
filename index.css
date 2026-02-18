@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 108 76 241;
+    --color-surface: 249 250 251;
+    --color-bg: 255 255 255;
+    --color-text: 17 24 39;
+    --color-muted: 107 114 128;
+    --color-border: 229 231 235;
+    --color-soft: 241 238 255;
+  }
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+}

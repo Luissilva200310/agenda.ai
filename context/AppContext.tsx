@@ -4,6 +4,46 @@ import { initialAppointments, servicesList, costsList } from '../data/mockData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { supabase } from '../utils/supabaseClient';
 
+// Helper: Map from DB (snake_case) to App (camelCase)
+const mapFromDbSettings = (dbData: any): BusinessSettings => ({
+    businessName: dbData.business_name || '',
+    slug: dbData.slug || '',
+    description: dbData.description || '',
+    coverColor: dbData.cover_color || 'from-brand-primary to-purple-400',
+    coverImage: dbData.cover_image || null,
+    logo: dbData.logo || null,
+    themeColor: dbData.theme_color || '#6C4CF1',
+    phone: dbData.phone || '',
+    address: dbData.address || '',
+    openDays: dbData.open_days || [],
+    openTime: dbData.open_time || '09:00',
+    closeTime: dbData.close_time || '18:00',
+    ownerName: dbData.owner_name || '',
+    ownerTitle: dbData.owner_title || '',
+    email: dbData.email || ''
+});
+
+// Helper: Map from App (camelCase) to DB (snake_case)
+const mapToDbSettings = (appData: Partial<BusinessSettings>) => {
+    const mapping: Record<string, any> = {};
+    if (appData.businessName !== undefined) mapping.business_name = appData.businessName;
+    if (appData.slug !== undefined) mapping.slug = appData.slug;
+    if (appData.description !== undefined) mapping.description = appData.description;
+    if (appData.coverColor !== undefined) mapping.cover_color = appData.coverColor;
+    if (appData.coverImage !== undefined) mapping.cover_image = appData.coverImage;
+    if (appData.logo !== undefined) mapping.logo = appData.logo;
+    if (appData.themeColor !== undefined) mapping.theme_color = appData.themeColor;
+    if (appData.phone !== undefined) mapping.phone = appData.phone;
+    if (appData.address !== undefined) mapping.address = appData.address;
+    if (appData.openDays !== undefined) mapping.open_days = appData.openDays;
+    if (appData.openTime !== undefined) mapping.open_time = appData.openTime;
+    if (appData.closeTime !== undefined) mapping.close_time = appData.closeTime;
+    if (appData.ownerName !== undefined) mapping.owner_name = appData.ownerName;
+    if (appData.ownerTitle !== undefined) mapping.owner_title = appData.ownerTitle;
+    if (appData.email !== undefined) mapping.email = appData.email;
+    return mapping;
+};
+
 interface AppContextType {
     // State
     currentView: ViewMode;
@@ -143,7 +183,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 if (clientsData) setClients(clientsData as any);
                 if (servicesData) setServices(servicesData as any);
                 if (costsData) setCosts(costsData as any);
-                if (settingsData) setBusinessSettings(settingsData as any);
+                if (settingsData) setBusinessSettings(mapFromDbSettings(settingsData));
 
                 if (appointmentsData) {
                     const mappedAppts = appointmentsData.map((a: any) => ({
@@ -199,7 +239,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (clientsData) setClients(clientsData as any);
             if (servicesData) setServices(servicesData as any);
             if (costsData) setCosts(costsData as any);
-            if (settingsData) setBusinessSettings(settingsData as any);
+            if (settingsData) setBusinessSettings(mapFromDbSettings(settingsData));
 
             // Map appointments back to the ExtendedClient interface format for compatibility
             if (appointmentsData) {
@@ -431,11 +471,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const updateBusinessSettings = async (updates: Partial<BusinessSettings>) => {
+        const dbUpdates = mapToDbSettings(updates);
+        // We also need the current settings mapped to db format to merge properly if doing a full upsert,
+        // but here we might just want to update specific fields.
+        // However, the original code used upsert with ...businessSettings.
+
+        // Let's get the latest state from DB or just merge logical state
+        const currentDbState = mapToDbSettings(businessSettings);
+
         const { error } = await supabase
             .from('business_settings')
             .upsert({
-                ...businessSettings,
-                ...updates,
+                ...currentDbState,
+                ...dbUpdates,
                 updated_at: new Date().toISOString()
             });
         if (!error) fetchData();

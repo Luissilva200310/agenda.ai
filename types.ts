@@ -3,6 +3,7 @@ export enum ViewMode {
   // Public / Auth
   LOGIN = 'LOGIN',
   SIGNUP = 'SIGNUP',
+  VERIFY_EMAIL = 'VERIFY_EMAIL',
   ONBOARDING_1 = 'ONBOARDING_1',
   ONBOARDING_2 = 'ONBOARDING_2',
   ONBOARDING_3 = 'ONBOARDING_3',
