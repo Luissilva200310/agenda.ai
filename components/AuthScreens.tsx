@@ -8,7 +8,7 @@ import { Heading1, Heading2, BodyText, Label } from './Typography';
 import { ViewMode } from '../types';
 import { Logo } from './Logo';
 import { useAppContext } from '../context/AppContext';
-import { supabase } from '../utils/supabaseClient';
+import { supabase, isSupabaseConfigured } from '../utils/supabaseClient';
 
 
 interface AuthProps {
@@ -114,10 +114,17 @@ export const AuthScreens: React.FC<AuthProps> = ({ view, onNavigate }) => {
       return;
     }
 
+    if (!isSupabaseConfigured) {
+      setError('Erro de configuração: as variáveis do Supabase não estão definidas. Contate o administrador.');
+      console.error('[Signup] Supabase não configurado. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
+      console.log('[Signup] Tentando criar conta para:', signupData.email);
       const { data, error: signupError } = await supabase.auth.signUp({
         email: signupData.email,
         password: signupData.password,
@@ -128,12 +135,15 @@ export const AuthScreens: React.FC<AuthProps> = ({ view, onNavigate }) => {
         }
       });
 
+      console.log('[Signup] Resposta:', { user: data?.user?.id, session: !!data?.session, error: signupError });
+
       if (signupError) throw signupError;
 
       // Check if email confirmation is required
       if (data?.user && !data.session) {
         // Email confirmation required
-        onNavigate(ViewMode.VERIFY_EMAIL); // We need to add this to types.ts first, but for now let's handle in component or add a local state view
+        console.log('[Signup] Confirmação de e-mail necessária');
+        onNavigate(ViewMode.VERIFY_EMAIL);
         return;
       }
 
@@ -146,6 +156,7 @@ export const AuthScreens: React.FC<AuthProps> = ({ view, onNavigate }) => {
 
       onNavigate(ViewMode.ONBOARDING_1);
     } catch (err: any) {
+      console.error('[Signup] Erro:', err);
       setError(err.message || 'Erro ao criar conta. Tente novamente.');
     } finally {
       setLoading(false);

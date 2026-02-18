@@ -1,10 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase URL or Anon Key is missing. Make sure to define SUPABASE_URL and SUPABASE_ANON_KEY in your .env file.');
+    console.error('[Supabase] ❌ VARIÁVEIS DE AMBIENTE FALTANDO! Verifique VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.');
+    console.error('[Supabase] URL:', supabaseUrl ? '✅ OK' : '❌ VAZIO');
+    console.error('[Supabase] ANON KEY:', supabaseAnonKey ? '✅ OK' : '❌ VAZIO');
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
