@@ -60,7 +60,20 @@ const App: React.FC = () => {
           setCurrentView(ViewMode.DASHBOARD);
         }
       } else {
-        setCurrentView(ViewMode.LOGIN);
+        // Don't redirect if we're on a public/auth view (signup, verify email, onboarding, etc.)
+        const safeViews = [
+          ViewMode.LOGIN,
+          ViewMode.SIGNUP,
+          ViewMode.VERIFY_EMAIL,
+          ViewMode.ADMIN_LOGIN,
+          ViewMode.ONBOARDING_1,
+          ViewMode.ONBOARDING_2,
+          ViewMode.ONBOARDING_3
+        ];
+        const isSafeView = safeViews.includes(currentView) || currentView.startsWith('PUBLIC');
+        if (!isSafeView) {
+          setCurrentView(ViewMode.LOGIN);
+        }
       }
     });
 
