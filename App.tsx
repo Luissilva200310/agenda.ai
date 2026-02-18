@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { ViewMode } from './types';
 import { Layout } from './components/Layout';
 import { AuthScreens } from './components/AuthScreens';
@@ -9,6 +9,7 @@ import { DesignSystemShowcase } from './components/DesignSystemShowcase';
 import { SuperAdminPanel } from './components/SuperAdminPanel';
 import { useAppContext } from './context/AppContext';
 import { supabase } from './utils/supabaseClient';
+import { usePublicBookingData } from './hooks/usePublicBookingData';
 
 
 const App: React.FC = () => {
@@ -25,12 +26,22 @@ const App: React.FC = () => {
     addAppointment
   } = useAppContext();
 
+  // Detect slug from URL for personalized public booking
+  const urlSlug = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('slug');
+  }, []);
+
+  const publicData = usePublicBookingData(urlSlug);
+
   // Check session, URL params, and listen for auth changes
   useEffect(() => {
     // Check URL params FIRST for public/admin access
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get('view');
-    if (viewParam === 'public') {
+    const slugParam = params.get('slug');
+
+    if (slugParam || viewParam === 'public') {
       setCurrentView(ViewMode.PUBLIC_SERVICE);
       return; // Don't check session for public views
     } else if (viewParam === 'admin') {
@@ -134,13 +145,39 @@ const App: React.FC = () => {
 
   // 4. PUBLIC BOOKING FLOW (No Sidebar, Distinct Layout, Shared Data)
   if (currentView.startsWith('PUBLIC')) {
+    // Use slug-based data if available, otherwise fall back to context data
+    const pubSettings = (urlSlug && publicData.businessSettings) ? publicData.businessSettings : businessSettings;
+    const pubServices = (urlSlug && publicData.services.length > 0) ? publicData.services : services;
+
+    if (urlSlug && publicData.loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-brand-surface">
+          <div className="text-center space-y-4 animate-pulse">
+            <div className="w-16 h-16 bg-brand-primary/20 rounded-full mx-auto"></div>
+            <p className="text-brand-muted">Carregando...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (urlSlug && publicData.error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-brand-surface">
+          <div className="text-center space-y-4">
+            <p className="text-red-500 font-semibold">{publicData.error}</p>
+            <p className="text-brand-muted text-sm">Verifique se o link está correto.</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <PublicBooking
         view={currentView}
         onNavigate={setCurrentView}
-        services={services}
+        services={pubServices}
         appointments={appointments}
-        businessSettings={businessSettings}
+        businessSettings={pubSettings}
         onBookingComplete={addAppointment}
       />
     );
